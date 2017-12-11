@@ -1,22 +1,60 @@
-import sys, os
-import requests
-import socket
+#!/usr/bin/env python
+
+import json
 import conf as cfg
+import time
+import socket
+import requests
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+import base64
 
-#print(socket.gethostname())
+'''
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
+'''
 
+class MyHandler(PatternMatchingEventHandler):
 
-#a = list(set(os.listdir(cfg.path))
+    patterns = cfg.fileextension
+    ignore_directories=True
+    case_sensitive=False
+    recursive=False
 
-#lookup = open(changelist,"a")
+    def process(self, event):
 
-for logfile in os.listdir(cfg.path):
-    if logfile.endswith(cfg.extension):
-        filename = os.path.join(cfg.path, logfile)
+        with open(event.src_path, 'rb') as log_source:
 
+            postheaders = {
+                'Authorization' : 'Not Implemented',
+                'Accept' : 'application/json',
+                'Content-Type' : 'application/json'
+            }
+            postbody = {
+                "hostname": socket.gethostname(),
+                "filename": event.src_path,
+                "filecontent": base64.b64encode(log_source.read())
+            }
 
-        print (format(os.stat(filename).st_mtime))
+        r = requests.post(cfg.url, data=json.dumps(postbody), headers=postheaders)
 
-#url = 'https://api.example.com/api/dir/v1/accounts/9999999/orders'
-#headers = {'Authorization' : '(some auth code)', 'Accept' : 'application/json', 'Content-Type' : 'application/json'}
-#r = requests.post(url, data=open('example.json', 'rb'), headers=headers)
+    def on_modified(self, event):
+        self.process(event)
+
+    def on_created(self, event):
+        self.process(event)
+
+if __name__ == '__main__':
+    observer = Observer()
+    observer.schedule(MyHandler(), path=cfg.filepath)
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+
+    observer.join()

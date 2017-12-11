@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 
-# path to monitor must have 'r' before path with doublequotes
+# FILEPATH is used by forwarder.py to monitor.
+# other configuration options are not exposed, but it's possible to include
+# recursive notifications and so on, refer to code itself and to http://pythonhosted.org/watchdog/api.html
+# example: filepath = "/tmp/app101"
 
-filepath = "/Users/arseny/Documents/OneDrive - FOOD BUDDY SERVICE/training/2017-gojek/solution"
+filepath = "/tmp/app101"
 
-path = r"/Users/arseny/Documents/OneDrive - FOOD BUDDY SERVICE/training/2017-gojek/solution"
-
-
-# TO BE REMOVED?.. extension to monitor must have double-quotes
-
-extension = ".txt"
-
-#for watchdog -- below
+# FILEEXTENSION is used by forwarder.py -- below. multiple extensions are supported, should be separated
+# with a comma within one array, i.e. ["*.log", "*.xml", "*.debug"]
+# example: fileextension = ["*.log"]
 
 fileextension = ["*.txt"]
 
-#changelist is used needed to track what has been sent
-
-changelist = r"/Users/arseny/Documents/OneDrive - FOOD BUDDY SERVICE/training/2017-gojek/solution/changelist.log"
-
-# server API
+# URL is used to pass the protocol, FQDN, port, and exaxt RESTful verb's route for the the server
+# that would accept the logfile. File content is sent as a JSONified BASE64 POST method
+# example: url = "http://localhost:5000/save"
 
 url = "http://localhost:5000/save"
